@@ -1,6 +1,33 @@
-Write your reflection here.
+In this assignment, I tackled another ETL pipeline and the process of doing backend computation
+and data wrangling in order to give financial insights as well as producing data for providers that
+contains only partial information from the given data. I edited 4 files, clean.py, compute.py, payroll_app.py, and join.py.
+Each one played a specific part to the ETL process. In clean.py, I had to encompass and guard for many
+types of different inputs that could be put in for currencies and hours. This took taking steps to ensure
+inputs were strings, then stripping whitespace and seeing if the hours were in a valid format, and ultimately
+parsing a single number. These functions then would be used to do computations in compute.py, with clean values
+I was able to calculate each employee's gross_pay and whether or not they went into overtime hours based on
+the OVERTIME_THRESHOLD in compute.py. The data was split into two dataframes, one being an employees table
+which contained information about the employees, and a timesheet table that tracked the hours worked and the wages.
+To calculate the previous steps, we had to merge these on a shared primary key, in this case the employee_id.
+I merge this in join.py using a left join (with the timesheet as the left table) on employee_id as we need to ensure employees are
+paid for their hours, and it's possible for there to be employees not entered into the database but have worked hours. So
+unmatched employee_ids show up as unmatched but remain part of the table. In payroll_app.py we combine all 3
+parts of the app to take a timesheet and join it with employee information, and then present that as a report with
+an exportable condensed version using st.download_button. I already knew how to use st.metrics from the previous assignment,
+and in this case we have 4 metrics in 4 st.columns. Employees paid represents all matched employees, which I calculated by subtracting the total rows
+by the amount of unmatched rows, total hours which uses the sum of the cleaned "hours_worked" column, total gross pay
+which uses the sum cleaned gross_pay column, and overtime weeks which counts the rows where hours_worked > OVERTIME_THRESHOLD.
 
-See reflection.md for what makes a good reflection — be specific, use the
-terminology from this assignment (lineage, grain, element function, Series.apply,
-row apply / axis=1, left merge, NaN, coerce, copy-add-return, boolean index,
-export), and make it actionable.
+This lab was much like A3, so there wasn't much new information to be gained. However, I will say I learned
+a lot about accessing and applying functions through series.apply to pandas dataframes, and the understanding of
+which axis to use. We use axis=1 since the computations are by row/horizontal, using hours_worked and hourly_rate_usd added
+together to create a new column. It was also interesting to hear that we are meant to copy the given dataframe
+and make a new one as a return value each time, as I would've likely tried to modify it in place.
+
+My biggest challenge with this lab was in payroll_app.py, and it was the process in which I would display the warning
+and account for unmatched employees. My first thought was to just count the rows where employees had null first_names, since that
+would mean the join failed, but then I realized I needed to display the employee_ids that failed, so I ended up
+creating a separate df that just contained unmatched employees, and then converted the employee_id column to a list and used
+f"{', '.join(str(employee) for employee in unmatched_employees)}" to display all the ids. This also allowed me to calculate
+the number of matched employees by subtracting the length of the original dataframe by the length of this new dataframe.
+I also learned how to use the mime parameter to ensure that st.download_button produces a csv file.
