@@ -38,3 +38,53 @@ Test it: pytest tests/test_pipeline.py -k app
 #
 # What the page does NOT do: arithmetic on rows, cleaning, merging. If you find
 # yourself writing a loop or an apply here, that logic belongs in the package.
+
+import streamlit as st
+from payroll.extract import load_employees, load_timesheet
+from payroll.compute import build_payroll, payroll_export
+
+roster = load_employees()
+
+st.title("Salt City Coffee Weekly Payroll")
+
+upload = st.file_uploader("Upload weekly timesheet (CSV)", key="timesheet")
+
+if upload:
+
+    # Extract Timesheet + Build Payroll
+    timesheet = load_timesheet(upload)
+    payroll = build_payroll(timesheet, roster)
+    payroll_date = payroll["payroll_date"].max()
+
+    # Payroll Summary
+    st.subheader(f"Pay Period Ending {payroll_date}")
+    unmatched = payroll[payroll["first_name"].isna()]
+    unmatched_employees = unmatched["employee_id"].tolist()
+    total_unmatched = len(unmatched_employees)
+    col1, col2, col3, col4 = st.columns(4)
+    col1.metric("Employees paid", len(payroll) - len(unmatched))
+    col2.metric("Total hours", payroll["hours_worked"].sum())
+    col3.metric("Total gross pay", f"${payroll["gross_pay"].sum():,.2f}")
+    ot_weeks = (payroll["hours_worked"] > 40).sum()
+    col4.metric("Overtime weeks", ot_weeks)
+
+    # Unmatched Employee ID Warning
+    if total_unmatched > 0:
+        st.warning(
+            f"{total_unmatched} timesheet rows have an employee_id that is not on the roster: \
+                {', '.join(str(employee) for employee in unmatched_employees)}. \
+            They are NOT in the export -- Add them to HR's roster and re-upload."
+        )
+    else:
+        st.success("All Employee IDs matched successfully.")
+
+    # Display Payroll Table
+    st.subheader("Payroll table")
+    st.dataframe(payroll, hide_index=True)
+
+    st.download_button("Download payroll CSV for the provider",
+                       key="download",
+                       data=payroll_export(payroll).to_csv(index=False),
+                       file_name=f"payroll_{payroll_date}.csv",
+                       mime="text/csv")
+
