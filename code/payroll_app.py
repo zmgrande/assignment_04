@@ -70,10 +70,13 @@ if upload:
 
     # Unmatched Employee ID Warning
     if total_unmatched > 0:
+        unmatched_ids = ", ".join(
+            str(employee) for employee in unmatched_employees
+        )
         st.warning(
-            f"{total_unmatched} timesheet rows have an employee_id that is not on the roster: \
-                {', '.join(str(employee) for employee in unmatched_employees)}. \
-            They are NOT in the export -- Add them to HR's roster and re-upload."
+            f"{total_unmatched} timesheet rows have an employee_id that is not "
+            f"on the roster: {unmatched_ids}. "
+            "They are NOT in the export -- Add them to HR's roster and re-upload."
         )
     else:
         st.success("All Employee IDs matched successfully.")
@@ -87,4 +90,3 @@ if upload:
                        data=payroll_export(payroll).to_csv(index=False),
                        file_name=f"payroll_{payroll_date}.csv",
                        mime="text/csv")
-

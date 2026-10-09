@@ -51,7 +51,7 @@ def parse_hours(value) -> float:
 
     if not isinstance(value, str):
         if pd.isna(value):
-          return 0.0
+            return 0.0
         return float(value) if isinstance(value, (int, float)) else 0.0
 
     value = value.strip()

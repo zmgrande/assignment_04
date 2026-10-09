@@ -31,3 +31,8 @@ creating a separate df that just contained unmatched employees, and then convert
 f"{', '.join(str(employee) for employee in unmatched_employees)}" to display all the ids. This also allowed me to calculate
 the number of matched employees by subtracting the length of the original dataframe by the length of this new dataframe.
 I also learned how to use the mime parameter to ensure that st.download_button produces a csv file.
+
+What I would do to strengthen my understanding of pandas joins and operations would be to use it more in my projects,
+and using more complex queries to get a better understanding of how the data interacts with each other under pandas.
+For instance, I would want to practice knowing what data is retained and how merges work under the different
+join conditions allowed by pandas (left, right, inner, outer, on multiple columns, etc.)

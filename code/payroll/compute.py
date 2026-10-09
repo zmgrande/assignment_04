@@ -37,7 +37,7 @@ def calc_gross_pay(hours: float, rate: float) -> float:
     if pd.isna(rate):
         return 0.0
     regular_hours = min(OVERTIME_THRESHOLD, hours)
-    overtime_hours = max(0, hours-OVERTIME_THRESHOLD)
+    overtime_hours = max(0, hours - OVERTIME_THRESHOLD)
     return round(regular_hours * rate + overtime_hours * rate * OVERTIME_MULTIPLIER, 2)
 
 
@@ -67,14 +67,24 @@ def add_gross_pay(payroll: pd.DataFrame) -> pd.DataFrame:
         lambda row: calc_gross_pay(row["hours_worked"], row["hourly_rate_usd"])
     """
     out = payroll.copy()
-    out["gross_pay"] = out.apply(lambda row: calc_gross_pay(row["hours_worked"], row["hourly_rate_usd"]), axis=1)
+    out["gross_pay"] = out.apply(
+        lambda row: calc_gross_pay(
+            row["hours_worked"], row["hourly_rate_usd"]
+        ),
+        axis=1,
+    )
     return out
 
 
 def add_pay_type(payroll: pd.DataFrame) -> pd.DataFrame:
     """Return a copy with one new column, `pay_type`: `classify_pay` for every row."""
     out = payroll.copy()
-    out["pay_type"] = out.apply(lambda row: classify_pay(row["hours_worked"], row["hourly_rate_usd"]), axis=1)
+    out["pay_type"] = out.apply(
+        lambda row: classify_pay(
+            row["hours_worked"], row["hourly_rate_usd"]
+        ),
+        axis=1,
+    )
     return out
 
 
